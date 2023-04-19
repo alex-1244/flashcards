@@ -8,17 +8,38 @@ public class JsonBinConnector
 {
     private readonly JsonBinConfig _jsonBinConfig;
     private readonly IFlurlClient _flurlClient;
+    private ILogger<JsonBinConnector> _logger;
+    private IWebHostEnvironment _environment;
 
     public JsonBinConnector(
         IFlurlClientFactory flurlClientFactory,
-        JsonBinConfig jsonBinConfig)
+        JsonBinConfig jsonBinConfig,
+        ILogger<JsonBinConnector> logger,
+        IWebHostEnvironment environment)
     {
         _jsonBinConfig = jsonBinConfig;
+        _logger = logger;
+        _environment = environment;
         _flurlClient = flurlClientFactory.Get(jsonBinConfig.BaseUrl);
     }
 
     public async Task<IEnumerable<JsonBinsResponse>> GetFlashcardsBins()
     {
+        if (_environment.IsProduction())
+        {
+            return Enumerable.Empty<JsonBinsResponse>();
+        }
+
+        _logger.LogWarning($"test ApiKey");
+        if (string.IsNullOrWhiteSpace(_jsonBinConfig.ApiKey))
+        {
+            _logger.LogError("ApiKey is missing");
+        }
+        else
+        {
+            _logger.LogWarning($"ApiKey: {_jsonBinConfig.ApiKey.Substring(0, 15)}");
+        }
+
         var urlPart = $"/c/{_jsonBinConfig.FlashcardsCollectionId}/bins";
         var result = await _flurlClient
             .Request(urlPart)

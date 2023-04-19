@@ -20,4 +20,11 @@ public class FrontpageController : ControllerBase
 
         return Ok(bins);
     }
+
+    [HttpGet]
+    [Route("~/")]
+    public ActionResult GetIndex()
+    {
+        return Ok(new {a = 3});
+    }
 }
