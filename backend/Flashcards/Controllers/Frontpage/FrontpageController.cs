@@ -7,10 +7,14 @@ namespace Flashcards.Controllers.Frontpage;
 public class FrontpageController : ControllerBase
 {
     private readonly JsonBinConnector _jsonBinConnector;
+    private readonly ILogger<FrontpageController> _logger;
 
-    public FrontpageController(JsonBinConnector jsonBinConnector)
+    public FrontpageController(
+        JsonBinConnector jsonBinConnector,
+        ILogger<FrontpageController> logger)
     {
         _jsonBinConnector = jsonBinConnector;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -34,6 +38,7 @@ public class FrontpageController : ControllerBase
     [Route("~/")]
     public ActionResult GetIndex()
     {
+        _logger.LogWarning("Service alive");
         return Ok(new { a = 3 });
     }
 }
