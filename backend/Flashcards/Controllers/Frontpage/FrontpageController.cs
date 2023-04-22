@@ -22,9 +22,18 @@ public class FrontpageController : ControllerBase
     }
 
     [HttpGet]
+    [Route("~/{binId}")]
+    public async Task<ActionResult> GetBin([FromRoute] string binId)
+    {
+        var binCards = await _jsonBinConnector.GetFlashcardsBin(binId);
+
+        return Ok(binCards);
+    }
+
+    [HttpGet]
     [Route("~/")]
     public ActionResult GetIndex()
     {
-        return Ok(new {a = 3});
+        return Ok(new { a = 3 });
     }
 }

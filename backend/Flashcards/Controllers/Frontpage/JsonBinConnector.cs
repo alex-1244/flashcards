@@ -1,4 +1,6 @@
-﻿using Flashcards.Configuration;
+﻿using System.Text.Json.Nodes;
+using Flashcards.Configuration;
+using Flashcards.Models;
 using Flurl.Http;
 using Flurl.Http.Configuration;
 
@@ -25,21 +27,6 @@ public class JsonBinConnector
 
     public async Task<IEnumerable<JsonBinsResponse>> GetFlashcardsBins()
     {
-        if (_environment.IsProduction())
-        {
-            return Enumerable.Empty<JsonBinsResponse>();
-        }
-
-        _logger.LogWarning($"test ApiKey");
-        if (string.IsNullOrWhiteSpace(_jsonBinConfig.ApiKey))
-        {
-            _logger.LogError("ApiKey is missing");
-        }
-        else
-        {
-            _logger.LogWarning($"ApiKey: {_jsonBinConfig.ApiKey.Substring(0, 15)}");
-        }
-
         var urlPart = $"/c/{_jsonBinConfig.FlashcardsCollectionId}/bins";
         var result = await _flurlClient
             .Request(urlPart)
@@ -53,6 +40,20 @@ public class JsonBinConnector
             Name = b.SnippetMeta.Name,
             BinId = b.Record
         });
+    }
+
+    public async Task<IEnumerable<FlashcardModel>> GetFlashcardsBin(string binId)
+    {
+        var urlPart = $"/b/{binId}";
+        var result = await _flurlClient
+            .Request(urlPart)
+            .WithHeader("X-Master-Key", _jsonBinConfig.ApiKey)
+            .WithHeader("X-Bin-Meta", "false")
+            .GetAsync();
+
+        var binCards = await result.GetJsonAsync<List<FlashcardModel>>();
+
+        return binCards;
     }
 
     private class JsonBinCollection
