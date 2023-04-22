@@ -18,6 +18,7 @@ public class FrontpageController : ControllerBase
     }
 
     [HttpGet]
+    [ResponseCache(VaryByHeader = "User-Agent", Duration = 300)]
     public async Task<ActionResult<List<JsonBinsResponse>>> Get()
     {
         var bins = await _jsonBinConnector.GetFlashcardsBins();
@@ -27,6 +28,7 @@ public class FrontpageController : ControllerBase
 
     [HttpGet]
     [Route("~/{binId}")]
+    [ResponseCache(VaryByHeader = "User-Agent", Duration = 300)]
     public async Task<ActionResult> GetBin([FromRoute] string binId)
     {
         var binCards = await _jsonBinConnector.GetFlashcardsBin(binId);
