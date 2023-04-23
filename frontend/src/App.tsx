@@ -22,7 +22,6 @@ const App: React.FC = () => {
   async function fetchFlashcards(): Promise<FlashcardProps[]> {
     const response = await fetch(`${apiConfig.baseUrl}/${binId}`);
     const data = await response.json();
-    console.log(data);
     return data as FlashcardProps[];
   }
 
