@@ -4,8 +4,9 @@ using Flurl.Http.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
 
+// Add services to the container.
 builder.Services.AddCors();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
