@@ -19,7 +19,7 @@ const PartnerDetails: React.FC<any> = () => {
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
   const [partnerEmail, setPartnerEmail] = useState<string>(
-    TokenCache.getEmail(id) ?? ""
+    TokenCache.getEmail(+id!) ?? ""
   );
 
   let email: React.RefObject<HTMLInputElement> = React.createRef();
@@ -79,12 +79,12 @@ const PartnerDetails: React.FC<any> = () => {
       setButtonDisabled(false);
     }, 10000);
 
-    TokenCache.setEmail(id, email.current.value);
-    console.log(email.current.value);
+    TokenCache.setEmail(+id!, email.current!.value);
+    console.log(email.current!.value);
 
     const resp = await axios.post(`${apiConfig.baseUrl}/keycrm/report`, {
       Category: id,
-      Email: email.current.value,
+      Email: email.current!.value,
     });
 
     console.log(resp);
