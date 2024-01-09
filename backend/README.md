@@ -7,3 +7,6 @@
 	docker build -f .\Flashcards\Dockerfile -t flashcards .
 	docker tag flashcards:latest 915136666174.dkr.ecr.eu-west-1.amazonaws.com/flashcards:latest
 	docker push 915136666174.dkr.ecr.eu-west-1.amazonaws.com/flashcards:latest
+
+    dotnet tool install -g Amazon.Lambda.Tools
+    dotnet lambda deploy-function
