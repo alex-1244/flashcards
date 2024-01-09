@@ -82,10 +82,18 @@ const PartnerDetails: React.FC<any> = () => {
     TokenCache.setEmail(+id!, email.current!.value);
     console.log(email.current!.value);
 
-    const resp = await axios.post(`${apiConfig.baseUrl}/keycrm/report`, {
-      Category: id,
-      Email: email.current!.value,
-    });
+    const resp = await axios.post(
+      `${apiConfig.baseUrl}/keycrm/report`,
+      {
+        Category: id,
+        Email: email.current!.value,
+      },
+      {
+        headers: {
+          Authentication: TokenCache.getToken(),
+        },
+      }
+    );
 
     console.log(resp);
   };
