@@ -1,0 +1,44 @@
+.flashcard {
+  perspective: 1000px;
+  display: inline-block;
+  margin: 10px;
+  width: 300px;
+  height: 100px;
+  border: 1px solid red;
+}
+
+.sales-table {
+  border: 1px solid white;
+}
+
+.sales-table tbody td,
+.sales-table thead th {
+  border: 1px solid white;
+  padding: 5px;
+}
+
+.send-report-block {
+  margin-top: 30px;
+}
+
+.send-report-block input {
+  width: 40rem;
+  height: 50px;
+  font-size: 2rem;
+}
+
+.send-report-block button {
+  margin-top: 30px;
+}
+
+tr.total-row td {
+  border: 1px solid red;
+  font-size: 2rem;
+}
+
+.send-report-block button[disabled]:hover {
+  border: none;
+  cursor: not-allowed;
+  transition: none;
+  outline: none;
+}
