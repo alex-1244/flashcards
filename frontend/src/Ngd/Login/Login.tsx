@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import apiConfig from "../../apiConfig";
 import axios from "axios";
 import TokenCache from "../TokenCache";
-import { Navigate, redirect } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const Login: React.FC<any> = () => {
   if (TokenCache.getToken() != null) {
@@ -11,6 +11,7 @@ const Login: React.FC<any> = () => {
 
   let username: React.RefObject<HTMLInputElement> = React.createRef();
   let password: React.RefObject<HTMLInputElement> = React.createRef();
+  const navigate = useNavigate();
 
   const handleClick = async () => {
     const usrName = username.current;
@@ -25,6 +26,8 @@ const Login: React.FC<any> = () => {
 
     console.log(resp.data.token);
     TokenCache.setToken(resp.data.token);
+
+    navigate(`/ngd/partners`);
   };
 
   return (
