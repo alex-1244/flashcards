@@ -1,7 +1,10 @@
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using Amazon.SimpleEmail;
 using Flashcards.Configuration;
 using Flashcards.Controllers.Frontpage;
 using Flashcards.Controllers.KeyCrmReports;
+using Flashcards.Controllers.KeyCrmReports.Services;
 using Flurl.Http.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +22,10 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddSingleton<IFlurlClientFactory, PerBaseUrlFlurlClientFactory>();
 builder.Services.AddAWSService<IAmazonSimpleEmailService>();
+builder.Services.AddAWSService<IAmazonDynamoDB>();
+builder.Services.AddScoped<IDynamoDBContext, DynamoDBContext>();
+
+builder.Services.AddScoped<ReportEmailService>();
 
 var jsonBinConfig = new JsonBinConfig();
 builder.Configuration.Bind("JsonBin", jsonBinConfig);

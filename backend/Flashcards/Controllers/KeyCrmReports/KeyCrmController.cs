@@ -1,9 +1,6 @@
-﻿using System.Net;
-using System.Text;
-using Amazon.SimpleEmail;
-using Amazon.SimpleEmail.Model;
+﻿using System.Text;
+using Flashcards.Controllers.KeyCrmReports.Services;
 using Microsoft.AspNetCore.Mvc;
-using MimeKit;
 
 namespace Flashcards.Controllers.KeyCrmReports;
 
@@ -12,12 +9,17 @@ namespace Flashcards.Controllers.KeyCrmReports;
 public class KeyCrmController : ControllerBase
 {
     private readonly KeyCrmConnector _connector;
-    private readonly IAmazonSimpleEmailService _awsSes;
+    private readonly ReportEmailService _reportEmailService;
+    private readonly ILogger<KeyCrmController> _logger;
 
-    public KeyCrmController(KeyCrmConnector connector, IAmazonSimpleEmailService awsSes)
+    public KeyCrmController(
+        KeyCrmConnector connector,
+        ReportEmailService reportEmailService,
+        ILogger<KeyCrmController> logger)
     {
         _connector = connector;
-        _awsSes = awsSes;
+        _reportEmailService = reportEmailService;
+        _logger = logger;
     }
 
     [HttpPost("token")]
@@ -91,33 +93,17 @@ public class KeyCrmController : ControllerBase
         reportStream.Position = 0;
 
         //Source = "yiyi.store.od@gmail.com",
-
-        var bodyBuilder = new BodyBuilder();
-
-        bodyBuilder.HtmlBody = "Магазин 'ЇЇ', звіт за тиждень";
-        bodyBuilder.TextBody = "Магазин 'ЇЇ', звіт за тиждень";
-
-        bodyBuilder.Attachments.Add(fileName, reportStream);
-
-        var mimeMessage = new MimeMessage();
-        mimeMessage.From.Add(new MailboxAddress("yiyi store", "yiyi.store.od@gmail.com"));
-        mimeMessage.To.Add(new MailboxAddress(productDetails.PartnerName, request.Email));
-
-        mimeMessage.Subject = "Hey!";
-        mimeMessage.Body = bodyBuilder.ToMessageBody();
-        using (var messageStream = new MemoryStream())
+        try
         {
-            await mimeMessage.WriteToAsync(messageStream);
-            var sendRequest = new SendRawEmailRequest { RawMessage = new RawMessage(messageStream) };
-            var response = await _awsSes.SendRawEmailAsync(sendRequest);
-
-            if (response.HttpStatusCode == HttpStatusCode.OK)
-            {
-                return Ok();
-            }
-
-            return BadRequest(response.HttpStatusCode);
+            _reportEmailService.SendReport(request.Email, fileName, reportStream);
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while sending report e-mail");
+            return BadRequest();
+        }
+
+        return Ok();
     }
 
     private async Task<Stream> GetReport(ProductDetailsResponse details)
