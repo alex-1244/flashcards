@@ -46,9 +46,10 @@ public class KeyCrmConnector
 
             var token = await result.GetJsonAsync<KeyCrmLoginResponse>();
 
-            _cache.Set("keycrm_token", token.Token, TimeSpan.FromMinutes(5));
+            _cache.Set("keycrm_token", token.access_token, TimeSpan.FromMinutes(5));
+            _cache.Set("keycrm_refresh_token", token.refresh_token, TimeSpan.FromMinutes(5));
 
-            return token.Token;
+            return token.access_token;
         }
         catch (Exception ex)
         {
@@ -154,5 +155,9 @@ public class Partner
 
 public class KeyCrmLoginResponse
 {
-    public string Token { get; set; }
+    public string access_token { get; set; }
+
+    public string refresh_token { get; set; }
+
+    public int expires_in { get; set; }
 }
