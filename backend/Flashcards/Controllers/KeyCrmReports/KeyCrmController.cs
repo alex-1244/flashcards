@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using Flashcards.Controllers.KeyCrmReports.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -59,9 +60,12 @@ public class KeyCrmController : ControllerBase
     }
 
     [HttpGet("products")]
-    public async Task<ActionResult> GetProducts([FromQuery] int category)
+    public async Task<ActionResult> GetProducts([FromQuery] int category, [FromQuery] string startDate, [FromQuery] string endDate)
     {
-        var response = await GetProductDetails(category);
+        var sDate = DateTime.ParseExact(startDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+        var eDate = DateTime.ParseExact(endDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+
+        var response = await GetProductDetails(category, sDate, eDate);
 
         return Ok(new
         {
@@ -72,10 +76,13 @@ public class KeyCrmController : ControllerBase
         });
     }
 
-    [HttpPost("report-file")]
-    public async Task<ActionResult> DownloadReport([FromQuery] int category)
+    [HttpGet("report-file")]
+    public async Task<ActionResult> DownloadReport([FromQuery] int category, [FromQuery] string startDate, [FromQuery] string endDate)
     {
-        var productDetails = await GetProductDetails(category);
+        var sDate = DateTime.ParseExact(startDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+        var eDate = DateTime.ParseExact(endDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+
+        var productDetails = await GetProductDetails(category, sDate, eDate);
 
         var fileName =
             $"ngd_{productDetails.StartDate.ToString("yyyy-MM-dd")}_{productDetails.EndDate.ToString("yyyy-MM-dd")}.csv";
@@ -85,7 +92,10 @@ public class KeyCrmController : ControllerBase
     [HttpPost("report")]
     public async Task<ActionResult> SendReport(SendReportRequest request)
     {
-        var productDetails = await GetProductDetails(request.Category);
+        var sDate = DateTime.ParseExact(request.StartDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+        var eDate = DateTime.ParseExact(request.EndDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+
+        var productDetails = await GetProductDetails(request.Category, sDate, eDate);
 
         var fileName =
             $"ngd_{productDetails.StartDate.ToString("yyyy-MM-dd")}_{productDetails.EndDate.ToString("yyyy-MM-dd")}.csv";
@@ -117,31 +127,36 @@ public class KeyCrmController : ControllerBase
                 $"{Environment.NewLine}{record.Title};{record.avg_price};{record.total_purchase};{record.total_price};{record.SalesCount}");
         await sWriter.FlushAsync();
 
+        outputStream.Position = 0;
         return outputStream;
     }
 
-    private async Task<ProductDetailsResponse> GetProductDetails(int category)
+    private async Task<ProductDetailsResponse> GetProductDetails(int category, DateTime startDate, DateTime endDate)
     {
         var token = Request.Headers["Authentication"].FirstOrDefault();
 
         var today = DateTime.Today;
         var dayOfWeek = today.DayOfWeek;
-        var lastSunday = today.AddDays(-1 * (int)dayOfWeek);
-        var lastMonday = lastSunday.AddDays(-6);
+        endDate = endDate == DateTime.MinValue
+            ? today.AddDays(-1 * (int)dayOfWeek)
+            : endDate;
+        startDate = startDate == DateTime.MinValue
+            ? startDate.AddDays(-6)
+            : startDate;
 
         var products = await _connector.GetProducts(new ProductsRequest
         {
             CategoryId = category,
-            From = lastMonday,
-            To = lastSunday,
+            From = startDate,
+            To = endDate,
             Token = token
         });
 
         var response = new ProductDetailsResponse
         {
             Products = products,
-            StartDate = lastMonday,
-            EndDate = lastSunday,
+            StartDate = startDate,
+            EndDate = endDate,
             PartnerName = (await _connector.GetPartners(token)).FirstOrDefault(x => x.Id == category)?.Name
                           ?? string.Empty
         };
@@ -168,4 +183,6 @@ public class SendReportRequest
 {
     public int Category { get; set; }
     public string Email { get; set; }
+    public string StartDate { get; set; }
+    public string EndDate { get; set; }
 }

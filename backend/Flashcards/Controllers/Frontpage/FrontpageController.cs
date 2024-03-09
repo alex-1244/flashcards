@@ -41,6 +41,11 @@ public class FrontpageController : ControllerBase
     [ResponseCache(VaryByHeader = "User-Agent", Duration = 300)]
     public async Task<ActionResult> GetBin([FromRoute] string binId)
     {
+        if (binId == "favicon.ico")
+        {
+            return Ok();
+        }
+
         var binCards = await _jsonBinConnector.GetFlashcardsBin(binId);
 
         return Ok(binCards);
