@@ -16,15 +16,12 @@ const Login: React.FC<any> = () => {
   const handleClick = async () => {
     const usrName = username.current;
     const pass = password.current;
-    console.log(usrName);
-    console.log(pass);
 
     const resp = await axios.post(`${apiConfig.baseUrl}/keycrm/token`, {
       username: usrName?.value,
       password: pass?.value,
     });
 
-    console.log(resp.data.token);
     TokenCache.setToken(resp.data.token);
 
     navigate(`/ngd/partners`);
